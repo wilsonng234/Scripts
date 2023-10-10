@@ -39,6 +39,7 @@ def isZipped(filename):
 
 def extract(zippedFile, output_dir, recursive, extractedFiles=[]):
     with zipfile.ZipFile(zippedFile, "r") as zObject:
+        print("Extracting: " + zippedFile)
         zObject.extractall(path=output_dir)
         print("Extracted: " + zippedFile)
 
@@ -53,8 +54,7 @@ def extract(zippedFile, output_dir, recursive, extractedFiles=[]):
                         output_dir = root
                         extractedFiles += [zippedFile]
 
-                        extract(zippedFile, output_dir, extractedFiles)
-
+                        extract(zippedFile, output_dir, recursive, extractedFiles)
 
 if __name__ == "__main__":
     parser = buildCmdParser()
