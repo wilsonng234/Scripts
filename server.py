@@ -1,34 +1,25 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from ssl import SSLContext, PROTOCOL_TLS_SERVER
+import socket
+from flask import Flask
+from flask_api import status
 
+HOST = socket.gethostbyname(socket.gethostname())
 PORT = 8000
-CERTIFICATE_PATH = "localhost.pem"
-PRIVATE_KEY_PATH = "localhost-key.pem"
+CERTIFICATE_PATH = "cert.pem"
+PRIVATE_KEY_PATH = "key.pem"
+
+application = Flask(__name__)
 
 
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == "/":
-            self.path = "/index.html"
-
-        try:
-            with open(self.path[1:], "rb") as file:
-                content = file.read()
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
-        except FileNotFoundError:
-            self.send_error(404, "File not found")
-
-
-def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler):
-    server_address = ("", PORT)
-    httpd = server_class(server_address, handler_class)
-
-    print(f"Serving at http://localhost:{PORT}")
-    httpd.serve_forever()
+@application.route("/")
+def index():
+    try:
+        with open("index.html", "rb") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "File not found", status.HTTP_400_BAD_REQUEST
 
 
 if __name__ == "__main__":
-    run()
+    application.run(
+        host=HOST, port=PORT, ssl_context=(CERTIFICATE_PATH, PRIVATE_KEY_PATH)
+    )
